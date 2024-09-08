@@ -21,7 +21,8 @@ namespace TweaksPlus.Patches
 			for (int i = 0; i < room.TileCount; i++)
 			{
 				var cell = room.TileAtIndex(i);
-				Find(__instance, cell.position.x, cell.position.z, cell.ConstBin, room);
+				if (!cell.Null && !cell.hideFromMap)
+					Find(__instance, cell.position.x, cell.position.z, cell.ConstBin, room);
 			}
 			return false;
 		}
