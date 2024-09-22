@@ -18,6 +18,7 @@ namespace TweaksPlus.Patches
 				int num = Random.Range(0, ___principal.ec.offices.Count); // Stuff from the method itself
 				___targetedNpc.Navigator.Entity.Teleport(___principal.ec.offices[num].RandomEntitySafeCellNoGarbage().FloorWorldPosition);
 				___targetedNpc.SentToDetention();
+				___targetedNpc.ClearGuilt();
 
 				// Actual detention below
 				var scolds = ___principal.audScolds; //(SoundObject[])audScolds.GetValue(___principal);
