@@ -19,7 +19,7 @@ namespace TweaksPlus.Patches
 						____potentialExits.RemoveAt(i--);
 			
 
-			static bool CheckCell(Cell cell) => cell.room.type != RoomType.Hall && cell.doorHere && cell.room.entitySafeCells.Contains(cell.position);
+			static bool CheckCell(Cell cell) => cell.room.type != RoomType.Hall && !cell.doorHere && cell.room.entitySafeCells.Contains(cell.position);
 		}
 
 		[HarmonyPatch("WanderFlee")]
