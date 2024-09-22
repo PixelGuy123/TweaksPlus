@@ -10,6 +10,9 @@ namespace TweaksPlus.Patches
 		[HarmonyPrefix]
 		static bool ActualNPCDetention(Collider other, ref NPC ___targetedNpc, ref Principal ___principal)
 		{
+			if (!Plugin.enablePrincipalNPCLecture.Value)
+				return true;
+
 			if (other.transform == ___targetedNpc.transform)
 			{
 				int num = Random.Range(0, ___principal.ec.offices.Count); // Stuff from the method itself
