@@ -8,7 +8,8 @@ namespace TweaksPlus
     public class Plugin : BaseUnityPlugin
     {
 		internal static ConfigEntry<bool> enableAutoMapFillCheck, enableChalklesInstaDisable, enableChalklesProportionalSpawn,
-			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer;
+			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
+			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying;
         private void Awake()
         {
 			Harmony h = new("pixelguy.pixelmodding.baldiplus.tweaksplus");
@@ -20,6 +21,10 @@ namespace TweaksPlus
 			enableItemUsageInPitstop = Config.Bind(mainSec, "Enable item usage in the Pitstop", true, "If True, the player will be able of using any item from their inventory in the shop (feature implemented since 0.7)");
 			enableItemDescRevealInStorageLocker = Config.Bind(mainSec, "Enable item description in storage locker", true, "If True, the item description will be displayed in a Storage Locker.");
 			enableMrsPompDynamicTimer = Config.Bind(mainSec, "Enable Mrs Pomp dynamic timer", true, "If True, Mrs Pomp\'s timer will be proportional to how far away you are from the classroom.");
+			enableNavigatorTargettingImprovement = Config.Bind(mainSec, "Enable Navigator improvement", true, "If True, the npc navigators will always avoid non-safe entity cells.");
+			enableHappyBaldiFix = Config.Bind(mainSec, "Enable Happy Baldi fix", true, "If True, Happy Baldi no longer crashes if Baldi is missing.");
+			enableNegativeUniqueness = Config.Bind(mainSec, "Enable different negative seeds", true, "If True, negative seeds will generate differently from positive, making a whole set of possibilities.");
+			enablePlaytimeBullying = Config.Bind(mainSec, "Enable Playtime bullying", true, "If True, cutting Playtime\'s rope will count as bullying for five seconds.");
 		}
 
 		const string mainSec = "Tweak Settings";
