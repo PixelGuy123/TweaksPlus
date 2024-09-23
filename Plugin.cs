@@ -10,9 +10,9 @@ namespace TweaksPlus
 		internal static ConfigEntry<bool> enableAutoMapFillCheck, enableChalklesInstaDisable, enableChalklesProportionalSpawn,
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
-			enableNPCActualDetention, enableRuleFreeZoneForNPCs;
+			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix;
 
-internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor;
+		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor;
         private void Awake()
         {
 			Harmony h = new("pixelguy.pixelmodding.baldiplus.tweaksplus");
@@ -32,8 +32,9 @@ internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor;
 			enableBullyGettingDetention = Config.Bind(mainSec, "Enable Bully detention", true, "If True, Bully will have actual detention when caught.");
 			enableNPCActualDetention = Config.Bind(mainSec, "Enable NPC actual detention", true, "If True, NPCs will always be frozen when sent to detention, for five seconds.");
 			enableRuleFreeZoneForNPCs = Config.Bind(mainSec, "Enable rule free zone for npcs", true, "If True, NPCs will have their guilt cleared in Rule Free zones (like Playground).");
-mrsPompTimerFactor = Config.Bind(mainSec, "Mrs Pomp distance factor", 3.6f, "Determines how long will be the timer by the distance multiplied by this constant/factor.");
-chalklesSizeFactor = Config.Bind(mainSec, "Chalkles charge factor", 1.65f, "Determines how long will take for Chalkles to charge by getting the magnitude of the size of the room multiplied by this constant/factor.");
+			mrsPompTimerFactor = Config.Bind(mainSec, "Mrs Pomp distance factor", 3.6f, "Determines how long will be the timer by the distance multiplied by this constant/factor.");
+			chalklesSizeFactor = Config.Bind(mainSec, "Chalkles charge factor", 1.65f, "Determines how long will take for Chalkles to charge by getting the magnitude of the size of the room multiplied by this constant/factor.");
+			enableNullMapTileFix = Config.Bind(mainSec, "Null map tile fix", true, "If True, Mrs Pomp\'s icon will no longer be invisible if the center of the room is an empty tile.");
 		}
 
 		const string mainSec = "Tweak Settings";
