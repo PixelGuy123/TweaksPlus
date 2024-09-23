@@ -11,6 +11,8 @@ namespace TweaksPlus
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
 			enableNPCActualDetention, enableRuleFreeZoneForNPCs;
+
+internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor;
         private void Awake()
         {
 			Harmony h = new("pixelguy.pixelmodding.baldiplus.tweaksplus");
@@ -30,6 +32,8 @@ namespace TweaksPlus
 			enableBullyGettingDetention = Config.Bind(mainSec, "Enable Bully detention", true, "If True, Bully will have actual detention when caught.");
 			enableNPCActualDetention = Config.Bind(mainSec, "Enable NPC actual detention", true, "If True, NPCs will always be frozen when sent to detention, for five seconds.");
 			enableRuleFreeZoneForNPCs = Config.Bind(mainSec, "Enable rule free zone for npcs", true, "If True, NPCs will have their guilt cleared in Rule Free zones (like Playground).");
+mrsPompTimerFactor = Config.Bind(mainSec, "Mrs Pomp distance factor", 3.6f, "Determines how long will be the timer by the distance multiplied by this constant/factor.");
+chalklesSizeFactor = Config.Bind(mainSec, "Chalkles charge factor", 1.65f, "Determines how long will take for Chalkles to charge by getting the magnitude of the size of the room multiplied by this constant/factor.");
 		}
 
 		const string mainSec = "Tweak Settings";
