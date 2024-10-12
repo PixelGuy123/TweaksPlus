@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using UnityEngine;
 
 namespace TweaksPlus
 {
@@ -10,9 +11,9 @@ namespace TweaksPlus
 		internal static ConfigEntry<bool> enableAutoMapFillCheck, enableChalklesInstaDisable, enableChalklesProportionalSpawn,
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
-			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying;
+			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder;
 
-		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor;
+		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor, bullyItemInHandTendency;
         private void Awake()
         {
 			Harmony h = new("pixelguy.pixelmodding.baldiplus.tweaksplus");
@@ -36,6 +37,14 @@ namespace TweaksPlus
 			chalklesSizeFactor = Config.Bind(mainSec, "Chalkles charge factor", 1.65f, "Determines how long will take for Chalkles to charge by getting the magnitude of the size of the room multiplied by this constant/factor.");
 			enableNullMapTileFix = Config.Bind(mainSec, "Null map tile fix", true, "If True, Mrs Pomp\'s icon will no longer be invisible if the center of the room is an empty tile.");
 			enableBeansBullying = Config.Bind(mainSec, "Beans bullying", true, "If True, Beans will be breaking the bullying rule for spitting gums and hitting them at somebody.");
+			enableAdditionalCulling = Config.Bind(mainSec, "Additional culling", true, "If True, more structures (like doors and windows) will be properly culled by the game, this should very slightly increase the performance.");
+			enableFreeWinMovement = Config.Bind(mainSec, "Additional culling", true, "If True, you can move during the win sequence (lol).");
+			enableProportionalYTPAdder = Config.Bind(mainSec, "YTP animation speed", true, "If True, the animation you get when receiving ytps will be proportional to your gain (bigger the difference, faster it is).");
+
+			bullyItemInHandTendency = Config.Bind(mainSec, "Bully item in hand tendency factor", 25f, 
+				"Percentage (0% - 100%) that determines the tendency of Bully to pickup the item selected in the inventory instead of any other (100% means he\'ll always choose your item in hand; 0% means no tendency behavior).");
+			bullyItemInHandTendency.Value = Mathf.Clamp(bullyItemInHandTendency.Value, 0f, 100f);
+
 		}
 
 		const string mainSec = "Tweak Settings";
