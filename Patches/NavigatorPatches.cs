@@ -14,9 +14,14 @@ namespace TweaksPlus.Patches
 		{
 			if (!Plugin.enableNavigatorTargettingImprovement.Value) return;
 
+			List<OpenGroupExit> copy = new(____potentialExits);
+
 			for (int i = 0; i < ____potentialExits.Count; i++)
 				if (CheckCell(____potentialExits[i].cell) && CheckCell(____potentialExits[i].OutputCell(___ec)))
 						____potentialExits.RemoveAt(i--);
+
+			if (____potentialExits.Count == 0)
+				____potentialExits = copy; // Safe measure to not make the npc stuck
 			
 
 			static bool CheckCell(Cell cell) => cell.room.type != RoomType.Hall && !cell.doorHere && !cell.room.entitySafeCells.Contains(cell.position);
@@ -43,12 +48,17 @@ namespace TweaksPlus.Patches
 				{
 					if (!Plugin.enableNavigatorTargettingImprovement.Value || startCell.open) return;
 
+					List<Direction> copy = new(dirs);
+
 					for (int i = 0; i < dirs.Count; i++)
 					{
 						var cell = ec.CellFromPosition(pos + dirs[i].ToIntVector2());
 						if (cell.room.type != RoomType.Hall && !cell.doorHere && !cell.room.entitySafeCells.Contains(cell.position))
 							dirs.RemoveAt(i--);
 					}
+
+					if (dirs.Count == 0)
+						dirs = copy; // Safe measure to not make the npc stuck
 
 				})
 				)
