@@ -17,7 +17,7 @@ namespace TweaksPlus.Patches
 			List<OpenGroupExit> copy = new(____potentialExits);
 
 			for (int i = 0; i < ____potentialExits.Count; i++)
-				if (CheckCell(____potentialExits[i].cell) && CheckCell(____potentialExits[i].OutputCell(___ec)))
+				if (CheckCell(____potentialExits[i].cell) || CheckCell(____potentialExits[i].OutputCell(___ec)))
 						____potentialExits.RemoveAt(i--);
 
 			if (____potentialExits.Count == 0)
