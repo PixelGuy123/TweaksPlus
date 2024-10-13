@@ -61,5 +61,32 @@ namespace TweaksPlus.Patches
 			
 			.InstructionEnumeration();
 
+		[HarmonyPatch(typeof(OpenTileGroup), "randomOpenTile")]
+		[HarmonyTranspiler]
+		static IEnumerable<CodeInstruction> AvoidRandomOpenCells(IEnumerable<CodeInstruction> i) =>
+			new CodeMatcher(i)
+			.End()
+			.MatchBack(false, 
+				new(OpCodes.Ldarg_0), 
+				new(CodeInstruction.LoadField(typeof(OpenTileGroup), "_possibleOpenCells")),
+				new(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(List<Cell>), "Count")),
+				new(OpCodes.Ldc_I4_0)
+				)
+			.InsertAndAdvance(
+				new(OpCodes.Ldarg_0),
+				new(CodeInstruction.LoadField(typeof(OpenTileGroup), "_possibleOpenCells")),
+				Transpilers.EmitDelegate((List<Cell> cells) =>
+				{
+					if (!Plugin.enableNavigatorTargettingImprovement.Value) return;
+
+					for (int i = 0; i < cells.Count; i++)
+						if (!cells[i].room.entitySafeCells.Contains(cells[i].position))
+							cells.RemoveAt(i--);
+
+				})
+				)
+
+			.InstructionEnumeration();
+
 	}
 }
