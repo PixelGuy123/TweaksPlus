@@ -9,7 +9,7 @@ namespace TweaksPlus.Patches
 	{
 		[HarmonyPatch("UpdatePotentialOpenExits")]
 		[HarmonyPatch("GetFurthestPotentialExits")]
-		[HarmonyPatch("GetHottestPotentialExits")]
+		[HarmonyPatch("GetHottestPotentialExit")]
 		[HarmonyPostfix]
 		static void AvoidWhileWanderingOpen(ref List<OpenGroupExit> ____potentialExits, EnvironmentController ___ec)
 		{
