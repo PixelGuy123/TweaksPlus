@@ -22,7 +22,7 @@ namespace TweaksPlus
 
 		internal static ConfigEntry<bool> enableNPCWeightBalance, enableItemWeightBalance, enableRandomEventWeightBalance, enableDebugLogs;
 
-		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor, bullyItemInHandTendency;
+		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor, bullyItemInHandTendency, ambienceDistancingFactor;
 		static Plugin plug;
 		private void Awake()
 		{
@@ -70,6 +70,9 @@ namespace TweaksPlus
 
 			enableDebugLogs = Config.Bind("Debugging", "Debug Logs", false,
 				"If True, some debug logs will appear in BepInEx Console.");
+
+			ambienceDistancingFactor = Config.Bind(mainSec, "Ambience Distancing Factor", 1.25f,
+				"The ambeince will always appear close to you. This factor sets how long the ambience noises will be far from you (factor * game\'s tile unit [10]). Setting to something lower than 0.5 will let it work by how the game does it.");
 
 			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), true); // Post load because GeneratorManagement *might* be misused
 		}
