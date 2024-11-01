@@ -5,6 +5,15 @@ using UnityEngine;
 
 namespace TweaksPlus.Patches
 {
+	//[HarmonyPatch(typeof(Ambience), "Initialize")]
+	//internal class AmbienceDebug
+	//{
+	//	static void Prefix(Ambience __instance)
+	//	{
+	//		__instance.minDelay = 3f;
+	//		__instance.maxDelay = 5f;
+	//	}
+	//}
 	[HarmonyPatch(typeof(Ambience), "Timer", MethodType.Enumerator)]
 	internal class AmbiencePatches
 	{
@@ -25,7 +34,7 @@ namespace TweaksPlus.Patches
 					if (ambFac <= 0.5)
 						return;
 					
-					ambFac *= 10f + ((amb.audMan.audioDevice.minDistance + amb.audMan.audioDevice.maxDistance) * 0.5f); // defaultUnit + average audio distance
+					ambFac *= 10f + ((amb.audMan.audioDevice.minDistance + amb.audMan.audioDevice.maxDistance) * 0.05f); // defaultUnit + average audio distance
 
 					var posRef = Singleton<CoreGameManager>.Instance.GetPlayer(Random.Range(0, Singleton<CoreGameManager>.Instance.setPlayers)).transform.position;
 					amb.pos.x = posRef.x + (Random.value >= 0.5f ? -ambFac : ambFac);
