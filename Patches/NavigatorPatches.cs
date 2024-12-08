@@ -53,8 +53,8 @@ namespace TweaksPlus.Patches
 							dirs.RemoveAt(i--);
 					}
 
-					if (dirs.Count == 0)
-						dirs = copy; // Safe measure to not make the npc stuck
+					if (dirs.Count <= 1) // If less than 1 or equal because I don't wanna npcs getting stuck
+						dirs = copy;
 
 				})
 				)
