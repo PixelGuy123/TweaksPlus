@@ -18,11 +18,12 @@ namespace TweaksPlus
 		internal static ConfigEntry<bool> enableAutoMapFillCheck, enableChalklesInstaDisable, enableChalklesProportionalSpawn,
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
-			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder;
+			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder,
+			enableGumVisualChange;
 
 		internal static ConfigEntry<bool> enableNPCWeightBalance, enableItemWeightBalance, enableRandomEventWeightBalance, enableDebugLogs;
 
-		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor, bullyItemInHandTendency, ambienceDistancingFactor;
+		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor, bullyItemInHandTendency, ambienceDistancingFactor, randomizedLockdownDoorSpeed;
 		static Plugin plug;
 		private void Awake()
 		{
@@ -56,6 +57,7 @@ namespace TweaksPlus
 			enableAdditionalCulling = Config.Bind(mainSec, "Additional culling", true, "If True, basically everything that is visible will be properly culled by the game (can be dangerous if they change places by another mod).");
 			enableFreeWinMovement = Config.Bind(mainSec, "Move in YAY floor", true, "If True, you can move during the win sequence (lol).");
 			enableProportionalYTPAdder = Config.Bind(mainSec, "YTP animation speed", true, "If True, the animation you get when receiving ytps will be proportional to your gain (bigger the difference, faster it is).");
+			enableGumVisualChange = Config.Bind(mainSec, "Gum Squished Visual", true, "If True, if Beans spits out the gum while squished, the gum will look squished too (similarly to how Cloud Copter does) and so, untouchable.");
 
 			bullyItemInHandTendency = Config.Bind(mainSec, "Bully item in hand tendency factor", 25f,
 				"Percentage (0% - 100%) that determines the tendency of Bully to pickup the item selected in the inventory instead of any other (100% means he\'ll always choose your item in hand; 0% means no tendency behavior).");
@@ -72,7 +74,11 @@ namespace TweaksPlus
 				"If True, some debug logs will appear in BepInEx Console.");
 
 			ambienceDistancingFactor = Config.Bind(mainSec, "Ambience Distancing Factor", 1.25f,
-				"The ambeince will always appear close to you. This factor sets how long the ambience noises will be far from you (factor * game\'s tile unit [10]). Setting to something lower than 0.5 will let it work by how the game does it.");
+				"The ambience will always appear close to you. This factor sets how long the ambience noises will be far from you (factor * game\'s tile unit [10]). Setting to something lower than 0.5 will let it work by how the game does it.");
+
+			randomizedLockdownDoorSpeed = Config.Bind(mainSec, "Max Lockdown Door Speed", 1f,
+				"Basically tells the maximum speed a lockdown door can reach randomly, so (1 to n). It can reach the maximum value of 50.");
+			randomizedLockdownDoorSpeed.Value = Mathf.Clamp(randomizedLockdownDoorSpeed.Value, 1f, 50f);
 
 			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), true); // Post load because GeneratorManagement *might* be misused
 		}
@@ -161,7 +167,15 @@ namespace TweaksPlus
 
 			yield return "Adding Renderer Container to everything...";
 			if (enableAdditionalCulling.Value)
-				Resources.FindObjectsOfTypeAll<Renderer>().Do(x => AdditionalCullingPatches.CreateRendererContainer(x.transform));
+			{
+				HashSet<Transform> prohibitedTransforms = [];
+				var vent = Resources.FindObjectsOfTypeAll<Structure_Vent>().First(x => x.GetInstanceID() > 0);
+				prohibitedTransforms.Add(vent.ventPieceBendPrefab);
+				prohibitedTransforms.Add(vent.ventPieceStraightPrefab);
+				prohibitedTransforms.Add(vent.ventPieceVerticalBendPrefab);
+
+				Resources.FindObjectsOfTypeAll<Renderer>().DoIf(x => !prohibitedTransforms.Contains(x.transform), x => AdditionalCullingPatches.CreateRendererContainer(x.transform));
+			}
 
 
 		}
