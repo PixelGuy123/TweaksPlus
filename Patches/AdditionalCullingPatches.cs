@@ -27,27 +27,27 @@ namespace TweaksPlus.Patches
 			rend.renderers = obj.GetComponentsInChildren<Renderer>();
 		}
 
-		internal static List<Type> notAllowedTypes = [typeof(Pickup), typeof(Tile), typeof(Elevator)];
+		internal static List<Type> notAllowedTypes = [typeof(Pickup), typeof(Tile), typeof(Elevator), typeof(VentController)];
 
-		[HarmonyPatch(typeof(CullingManager), "PrepareOcclusionCalculations")]
-		[HarmonyPostfix]
-		static void FindAllRendererContainers(EnvironmentController ___ec)
-		{
-			if (!Plugin.enableAdditionalCulling.Value) return;
+		//[HarmonyPatch(typeof(CullingManager), "PrepareOcclusionCalculations")] Why did I even coded this? The game does it by itself
+		//[HarmonyPostfix]
+		//static void FindAllRendererContainers(EnvironmentController ___ec)
+		//{
+		//	if (!Plugin.enableAdditionalCulling.Value) return;
 
-			UnityEngine.Object.FindObjectsOfType<RendererContainer>().Do(x =>
-			{
-				var cell = ___ec.CellFromPosition(x.transform.position);
-				if (!cell.Null)
-				{
-					x.renderers.Do(z =>
-					{
-						if (!cell.renderers.Contains(z))
-							cell.AddRenderer(z);
-					});
-				}
-			});
-		}
+		//	UnityEngine.Object.FindObjectsOfType<RendererContainer>().Do(x =>
+		//	{
+		//		var cell = ___ec.CellFromPosition(x.transform.position);
+		//		if (!cell.Null)
+		//		{
+		//			x.renderers.Do(z =>
+		//			{
+		//				if (!cell.renderers.Contains(z))
+		//					cell.AddRenderer(z);
+		//			});
+		//		}
+		//	});
+		//}
 
 		[HarmonyPatch(typeof(Chunk), "Render")]
 		[HarmonyFinalizer]

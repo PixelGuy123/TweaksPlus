@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using MTM101BaldAPI;
 using MTM101BaldAPI.Registers;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +19,8 @@ namespace TweaksPlus
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
 			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder,
 			enableGumVisualChange;
+
+		internal static ConfigEntry<bool> enableFieldTripCheatMode;
 
 		internal static ConfigEntry<bool> enableNPCWeightBalance, enableItemWeightBalance, enableRandomEventWeightBalance, enableDebugLogs;
 
@@ -80,6 +81,8 @@ namespace TweaksPlus
 				"Basically tells the maximum speed a lockdown door can reach randomly, so (1 to n). It can reach the maximum value of 50.");
 			randomizedLockdownDoorSpeed.Value = Mathf.Clamp(randomizedLockdownDoorSpeed.Value, 1f, 50f);
 
+			enableFieldTripCheatMode = Config.Bind(mainSec, "Enable field trip cheat", false, "If True, campfire frenzy will automatically launch the right item; In the picnic, it\'ll automatically take out the not-so-wished foods.");
+
 			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), true); // Post load because GeneratorManagement *might* be misused
 		}
 		public static void Log(string log)
@@ -97,29 +100,30 @@ namespace TweaksPlus
 		{
 			yield return 2;
 			yield return "Balancing weights...";
-			var levelObjects = Resources.FindObjectsOfTypeAll<CustomLevelObject>();
 
 
-			foreach (var ld in levelObjects)
+			foreach (var sco in Resources.FindObjectsOfTypeAll<SceneObject>())
 			{
-				LogWarning("Checking floor: " + ld.name);
+				var ld = sco.levelObject;
+				if (!ld)
+					continue;
 
 				if (enableNPCWeightBalance.Value) // Npc Balance 
 				{
 					Dictionary<string, List<WeightedNPC>> npcPairs = [];
-					for (int i = 0; i < ld.potentialNPCs.Count; i++)
+					for (int i = 0; i < sco.potentialNPCs.Count; i++)
 					{
-						string assemblyName = ld.potentialNPCs[i].selection.GetType().Assembly.FullName;
+						string assemblyName = sco.potentialNPCs[i].selection.GetType().Assembly.FullName;
 						if (npcPairs.TryGetValue(assemblyName, out var npcs))
-							npcs.Add(ld.potentialNPCs[i]);
+							npcs.Add(sco.potentialNPCs[i]);
 						else
-							npcPairs.Add(assemblyName, [ld.potentialNPCs[i]]);
+							npcPairs.Add(assemblyName, [sco.potentialNPCs[i]]);
 					}
 
 					foreach (var weightedNpc in npcPairs)
 					{
 						int midVal = weightedNpc.Value.Count;
-						weightedNpc.Value.ForEach(x => { x.weight = 100 + x.weight / midVal; Log($"NPC: For assembly \"{x.selection.name}\", we got the val of {x.weight}"); });
+						weightedNpc.Value.ForEach(x => { x.weight = 100 + x.weight / midVal; /*Log($"NPC: For assembly \"{x.selection.name}\", we got the val of {x.weight}");*/ });
 					}
 				}
 
@@ -138,7 +142,7 @@ namespace TweaksPlus
 					foreach (var weightedNpc in npcPairs)
 					{
 						int midVal = weightedNpc.Value.Count;
-						weightedNpc.Value.ForEach(x => { x.weight = 100 + x.weight / midVal; Log($"ITEM: For assembly \"{x.selection.name}\", we got the val of {x.weight}"); });
+						weightedNpc.Value.ForEach(x => { x.weight = 100 + x.weight / midVal; /*Log($"ITEM: For assembly \"{x.selection.name}\", we got the val of {x.weight}");*/ });
 					}
 
 				}
@@ -158,7 +162,7 @@ namespace TweaksPlus
 					foreach (var weightedNpc in npcPairs)
 					{
 						int midVal = weightedNpc.Value.Count;
-						weightedNpc.Value.ForEach(x => { x.weight = 100 + x.weight / midVal; Log($"EVENT: For assembly \"{x.selection.name}\", we got the val of {x.weight}"); });
+						weightedNpc.Value.ForEach(x => { x.weight = 100 + x.weight / midVal; /*Log($"EVENT: For assembly \"{x.selection.name}\", we got the val of {x.weight}");*/ });
 					}
 
 				}
@@ -167,18 +171,11 @@ namespace TweaksPlus
 
 			yield return "Adding Renderer Container to everything...";
 			if (enableAdditionalCulling.Value)
-			{
-				HashSet<Transform> prohibitedTransforms = [];
-				var vent = Resources.FindObjectsOfTypeAll<Structure_Vent>().First(x => x.GetInstanceID() > 0);
-				prohibitedTransforms.Add(vent.ventPieceBendPrefab);
-				prohibitedTransforms.Add(vent.ventPieceStraightPrefab);
-				prohibitedTransforms.Add(vent.ventPieceVerticalBendPrefab);
-
-				Resources.FindObjectsOfTypeAll<Renderer>().DoIf(x => !prohibitedTransforms.Contains(x.transform), x => AdditionalCullingPatches.CreateRendererContainer(x.transform));
-			}
+				Resources.FindObjectsOfTypeAll<Renderer>().Do(x => AdditionalCullingPatches.CreateRendererContainer(x.transform));
+			
 
 
 		}
-		const string mainSec = "Tweak Settings", balanceSec = "Balancing Settings";
+		const string mainSec = "Tweak Settings", balanceSec = "Balancing Settings", cheatSec = "Cheat Settings";
 	}
 }
