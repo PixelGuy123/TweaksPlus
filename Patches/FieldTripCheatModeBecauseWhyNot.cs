@@ -25,7 +25,7 @@ namespace TweaksPlus.Patches
 		[HarmonyPostfix]
 		static void RemoveUnwantedStuff(PlateController __instance, bool ___valid)
 		{
-			if (Plugin.enableFieldTripCheatMode.Value && (!___valid || __instance.IsBomb))
+			if (Plugin.enableFieldTripCheatMode.Value && (___valid || __instance.IsBomb))
 				__instance.Pressed();
 		}
 	}
