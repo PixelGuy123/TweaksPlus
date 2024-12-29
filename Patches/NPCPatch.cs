@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace TweaksPlus.Patches
 {
@@ -19,7 +18,7 @@ namespace TweaksPlus.Patches
 			{
 				yield return null;
 				var detention = new NavigationState_DetentionState(__instance, 99, __instance.ec.CellFromPosition(__instance.transform.position).room);
-				__instance.behaviorStateMachine.ChangeNavigationState(detention);
+				__instance.navigationStateMachine.ChangeState(detention);
 				float cooldown = 15f;
 				while (cooldown > 0f)
 				{
