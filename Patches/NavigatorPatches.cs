@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using TweaksPlus.Comps;
+using UnityEngine;
 
 namespace TweaksPlus.Patches
 {
@@ -66,8 +68,8 @@ namespace TweaksPlus.Patches
 		static IEnumerable<CodeInstruction> AvoidRandomOpenCells(IEnumerable<CodeInstruction> i) =>
 			new CodeMatcher(i)
 			.End()
-			.MatchBack(false, 
-				new(OpCodes.Ldarg_0), 
+			.MatchBack(false,
+				new(OpCodes.Ldarg_0),
 				new(CodeInstruction.LoadField(typeof(OpenTileGroup), "_possibleOpenCells")),
 				new(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(List<Cell>), "Count")),
 				new(OpCodes.Ldc_I4_0)
@@ -87,6 +89,20 @@ namespace TweaksPlus.Patches
 				)
 
 			.InstructionEnumeration();
+	}
 
+	[ConditionalPatchConfigWithDesc(Plugin.mainSec, "Enable smarter navigators", "If True, NPCs will use vents as shotcut if required to go somewhere.", true)]
+	[HarmonyPatch(typeof(Navigator))]
+	internal static class NavigatorSmartPatch
+	{
+		[HarmonyPatch("FindPath", [typeof(Vector3), typeof(Vector3), typeof(bool)])]
+		[HarmonyTranspiler]
+		static IEnumerable<CodeInstruction> MakeSmartPaths(IEnumerable<CodeInstruction> i) =>
+			new CodeMatcher(i)
+			.MatchForward(false,
+				new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(EnvironmentController), "FindPath"))
+				)
+			.Set(OpCodes.Call, AccessTools.Method(typeof(ModifiedFindPath), "FindPathWithExtraAttributes"))
+			.InstructionEnumeration();
 	}
 }

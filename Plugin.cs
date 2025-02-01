@@ -4,33 +4,37 @@ using HarmonyLib;
 using MTM101BaldAPI.Registers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TweaksPlus.Patches;
 using UnityEngine;
+using MTM101BaldAPI;
 
 namespace TweaksPlus
 {
-	[BepInPlugin("pixelguy.pixelmodding.baldiplus.tweaksplus", PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+	[BepInPlugin(guid, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 	[BepInDependency("mtm101.rulerp.bbplus.baldidevapi", BepInDependency.DependencyFlags.HardDependency)]
 	public class Plugin : BaseUnityPlugin
 	{
+		public const string guid = "pixelguy.pixelmodding.baldiplus.tweaksplus";
+
 		internal static ConfigEntry<bool> enableAutoMapFillCheck, enableChalklesInstaDisable, enableChalklesProportionalSpawn,
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
 			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder,
-			enableGumVisualChange;
+			enableGumVisualChange, enableMarkersWithPathfinding, enableMarkerAutoDisable;
 
 		internal static ConfigEntry<bool> enableFieldTripCheatMode;
 
 		internal static ConfigEntry<bool> enableNPCWeightBalance, enableItemWeightBalance, enableRandomEventWeightBalance, enableDebugLogs;
 
 		internal static ConfigEntry<float> mrsPompTimerFactor, chalklesSizeFactor, bullyItemInHandTendency, ambienceDistancingFactor, randomizedLockdownDoorSpeed;
-		static Plugin plug;
+		internal static Plugin plug;
+#pragma warning disable IDE0051 // Remover membros privados não utilizados
 		private void Awake()
+#pragma warning restore IDE0051 // Remover membros privados não utilizados
 		{
 			plug = this;
 			Harmony h = new("pixelguy.pixelmodding.baldiplus.tweaksplus");
-			h.PatchAll();
+			h.PatchAllConditionals();
 
 			enableAutoMapFillCheck = Config.Bind(mainSec, "Enable map forced fillup", true, "If True, for any room that you enter, all the map tiles will be forcefully revealed, regardless of their shape.");
 			enableChalklesInstaDisable = Config.Bind(mainSec, "Enable Chalkles instant disable", true, "If True, the moment you leave a room with Chalkles will instantly reset him (like it used to be before v0.4).");
@@ -82,6 +86,9 @@ namespace TweaksPlus
 			randomizedLockdownDoorSpeed.Value = Mathf.Clamp(randomizedLockdownDoorSpeed.Value, 1f, 50f);
 
 			enableFieldTripCheatMode = Config.Bind(mainSec, "Enable field trip cheat", false, "If True, campfire frenzy will automatically launch the right item; In the picnic, it\'ll automatically take out the not-so-wished foods.");
+
+			enableMarkersWithPathfinding = Config.Bind(mainSec, "Enable marker pathfind", true, "If True, every time you place a marker, it\'ll generate a path to make it easier to find the marked spot.");
+			enableMarkerAutoDisable = Config.Bind(mainSec, "Enable marker auto-disable", true, "If True, every time you step on a marker, it\'ll be automatically removed.");
 
 			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), true); // Post load because GeneratorManagement *might* be misused
 		}
@@ -176,6 +183,6 @@ namespace TweaksPlus
 
 
 		}
-		const string mainSec = "Tweak Settings", balanceSec = "Balancing Settings", cheatSec = "Cheat Settings";
+		public const string mainSec = "Tweak Settings", balanceSec = "Balancing Settings", cheatSec = "Cheat Settings";
 	}
 }
