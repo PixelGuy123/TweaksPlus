@@ -26,9 +26,8 @@ namespace TweaksPlus.Patches
 				new(OpCodes.Ldloc_0), // Not only adds a new constructor, gets the speed from the entity too
 				Transpilers.EmitDelegate((Entity e) =>
 				{
-					const float additionalSpeedMultiplier = 31.5f;
 					float mag = e.Velocity.magnitude;
-					return !float.IsNaN(mag) ? mag * additionalSpeedMultiplier : 0f; // Make sure it's not NAN since the player can do that (not sure for PlayerEntity tho..., but just in case);
+					return !float.IsNaN(mag) ? Mathf.Pow(mag, 7.5f) : 0f; // Make sure it's not NAN since the player can do that (not sure for PlayerEntity tho..., but just in case);
 				})
 				)
 			.MatchForward(false,
