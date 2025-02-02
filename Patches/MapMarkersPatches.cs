@@ -125,7 +125,7 @@ namespace TweaksPlus.Patches
 		[HarmonyPrefix]
 		static void CheckForDeletion(EnvironmentController ___ec, bool ___advancedMode, ref List<MapMarker> ___markers)
 		{
-			if (!Plugin.enableMarkerAutoDisable.Value || ___advancedMode) return;
+			if (!Plugin.enableMarkerAutoDisable.Value || ___advancedMode || (!Singleton<CoreGameManager>.Instance.GetPlayer(0)?.plm.Entity.InBounds ?? true)) return;
 
 			for (int i = 0; i < ___markers.Count; i++)
 			{

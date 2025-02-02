@@ -8,6 +8,12 @@ namespace TweaksPlus.Patches
 	internal class NPCPatch
 	{
 		[HarmonyPrefix]
+		[HarmonyPatch("SetGuilt")]
+		static bool ReallyNeedsGuilt(NPC __instance) =>
+			!__instance.ec.CellFromPosition(__instance.transform.position).room.
+			functions.functions.Exists(x => x is RuleFreeZone); // If there is a rule free zone, no guilt needs to be set (to avoid Principal's instant reaction)
+
+		[HarmonyPrefix]
 		[HarmonyPatch("SentToDetention")]
 		private static void StuckInDetention(NPC __instance)
 		{
