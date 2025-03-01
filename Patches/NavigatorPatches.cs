@@ -15,7 +15,7 @@ namespace TweaksPlus.Patches
 		[HarmonyPostfix]
 		static void AvoidWhileWanderingOpen(ref List<OpenGroupExit> ____potentialExits, EnvironmentController ___ec)
 		{
-			if (!Plugin.enableNavigatorTargettingImprovement.Value) return;
+			if (!Plugin.enableNavigatorTargettingImprovement.Value || !LevelBuilderRefGetter.instance || LevelBuilderRefGetter.instance is LevelLoader) return;
 
 			for (int i = 0; i < ____potentialExits.Count; i++)
 				if (CheckCell(____potentialExits[i].cell) || CheckCell(____potentialExits[i].OutputCell(___ec)))
@@ -44,7 +44,7 @@ namespace TweaksPlus.Patches
 				CodeInstruction.LoadField(typeof(Navigator), "_gridPosition"),
 				Transpilers.EmitDelegate((List<Direction> dirs, Cell startCell, EnvironmentController ec, IntVector2 pos) => // Basically clean up the potentialDirs after FillOpenDirectionsFromBin
 				{
-					if (!Plugin.enableNavigatorTargettingImprovement.Value || startCell.open) return;
+					if (!Plugin.enableNavigatorTargettingImprovement.Value || startCell.open || !LevelBuilderRefGetter.instance || LevelBuilderRefGetter.instance is LevelLoader) return;
 
 					List<Direction> copy = new(dirs);
 
@@ -79,7 +79,7 @@ namespace TweaksPlus.Patches
 				new(CodeInstruction.LoadField(typeof(OpenTileGroup), "_possibleOpenCells")),
 				Transpilers.EmitDelegate((List<Cell> cells) =>
 				{
-					if (!Plugin.enableNavigatorTargettingImprovement.Value) return;
+					if (!Plugin.enableNavigatorTargettingImprovement.Value || !LevelBuilderRefGetter.instance || LevelBuilderRefGetter.instance is LevelLoader) return;
 
 					for (int i = 0; i < cells.Count; i++)
 						if (!cells[i].room.entitySafeCells.Contains(cells[i].position))
@@ -101,8 +101,8 @@ namespace TweaksPlus.Patches
 			new CodeMatcher(i)
 			.MatchForward(false,
 				new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(EnvironmentController), "FindPath"))
-				)
-			.Set(OpCodes.Call, AccessTools.Method(typeof(ModifiedFindPath), "FindPathWithExtraAttributes"))
+				) // this EnvironmentController instance, Cell startTile, Cell targetTile, PathType pathType, out List<Cell> path, out bool success
+			.Set(OpCodes.Call, AccessTools.Method(typeof(ModifiedFindPath), nameof(ModifiedFindPath.FindPathWithExtraAttributes)))
 			.InstructionEnumeration();
 	}
 }

@@ -50,4 +50,13 @@ namespace TweaksPlus.Patches
 			}
 		}
 	}
+
+	[HarmonyPatch(typeof(LevelBuilder), "StartGenerate")]
+	internal static class LevelBuilderRefGetter
+	{
+		internal static LevelBuilder instance;
+
+		static void Prefix(LevelBuilder __instance) =>
+			instance = __instance;
+	}
 }

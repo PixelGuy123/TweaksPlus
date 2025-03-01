@@ -13,7 +13,9 @@ namespace TweaksPlus.Patches
 		[HarmonyPostfix]
 		static void AddPathfind(MapMarker __instance, Map map, Renderer ___environmentMarker)
 		{
-			if (!Plugin.enableMarkersWithPathfinding.Value || map.Ec.CellFromPosition(___environmentMarker.transform.position).Null || !Singleton<CoreGameManager>.Instance.GetPlayer(0).plm.Entity.InBounds)
+			if (!Plugin.enableMarkersWithPathfinding.Value || 
+				map.Ec.CellFromPosition(___environmentMarker.transform.position).Null || 
+				!Singleton<CoreGameManager>.Instance.GetPlayer(0).plm.Entity.InBounds)
 				return;
 
 			var path = map.Ec.FindNavPath(
@@ -126,11 +128,16 @@ namespace TweaksPlus.Patches
 		static void CheckForDeletion(EnvironmentController ___ec, bool ___advancedMode, ref List<MapMarker> ___markers)
 		{
 			if (!Plugin.enableMarkerAutoDisable.Value || ___advancedMode || (!Singleton<CoreGameManager>.Instance.GetPlayer(0)?.plm.Entity.InBounds ?? true)) return;
+			var cell = ___ec.CellFromPosition(Singleton<CoreGameManager>.Instance.GetPlayer(0).transform.position);
 
 			for (int i = 0; i < ___markers.Count; i++)
 			{
-				if (___ec.CellFromPosition(___markers[i].environmentMarker.transform.position) == ___ec.CellFromPosition(Singleton<CoreGameManager>.Instance.GetPlayer(0).transform.position))
-					___markers[i--].Delete();
+				if (___ec.CellFromPosition(___markers[i].environmentMarker.transform.position) == cell)
+				{
+					var mark = ___markers[i];
+					___markers.RemoveAt(i--); // Should avoid any stack overflow... I guess?
+					mark.Delete();
+				}
 			}
 		}
 
