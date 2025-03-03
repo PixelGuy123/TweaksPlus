@@ -22,13 +22,15 @@ namespace TweaksPlus.Patches
 
 			IEnumerator WaitToLeave()
 			{
+				EnvironmentController ec = __instance.ec;
 				yield return null;
-				var detention = new NavigationState_DetentionState(__instance, 99, __instance.ec.CellFromPosition(__instance.transform.position).room);
+				var detention = new NavigationState_DetentionState(__instance, 99, ec.CellFromPosition(__instance.transform.position).room);
 				__instance.navigationStateMachine.ChangeState(detention);
 				float cooldown = 15f;
+
 				while (cooldown > 0f)
 				{
-					cooldown -= __instance.ec.EnvironmentTimeScale * Time.deltaTime;
+					cooldown -= ec.EnvironmentTimeScale * Time.deltaTime;
 					yield return null;
 				}
 
@@ -36,7 +38,8 @@ namespace TweaksPlus.Patches
 				yield break;
 			}
 
-			__instance.Navigator.Entity.StartCoroutine(WaitToLeave());
+			if (__instance.Navigator.isActiveAndEnabled)
+				__instance.ec.StartCoroutine(WaitToLeave()); // The EnvironmentController can't just be disabled randomly... right?
 		}
 	}
 
@@ -59,7 +62,7 @@ namespace TweaksPlus.Patches
 		public void End()
 		{
 			priority = 0;
-			npc.behaviorStateMachine.RestoreNavigationState();
+			npc?.behaviorStateMachine.RestoreNavigationState();
 		}
 	}
 }

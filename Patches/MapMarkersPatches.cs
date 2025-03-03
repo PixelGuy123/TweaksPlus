@@ -68,8 +68,13 @@ namespace TweaksPlus.Patches
 					}
 				}
 			}
+			var finalPosition = new Vector3(___environmentMarker.transform.position.x, y, ___environmentMarker.transform.position.z);
 
-			positions[positions.Count - 1] = new(___environmentMarker.transform.position.x, y, ___environmentMarker.transform.position.z);
+			if (positions.Count == 0)
+				positions.Add(finalPosition);
+			else
+				positions[positions.Count - 1] = finalPosition;
+
 			lineRend.positionCount = positions.Count; // position count
 
 			lineRend.SetPositions([.. positions]);
