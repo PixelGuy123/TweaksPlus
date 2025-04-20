@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using HarmonyLib;
 using System.Reflection.Emit;
+using System.Reflection;
 
 namespace TweaksPlus.Comps
 {
@@ -120,9 +121,8 @@ namespace TweaksPlus.Comps
 	}
 
 	[HarmonyPatch(typeof(EnvironmentController))]
-	public static class ModifiedFindPath
-	{
-		readonly static List<VentController> vents = [];
+	internal static class ModifiedFindPath_Data{
+		readonly internal static List<VentController> vents = [];
 		[HarmonyPatch("BeginPlay")]
 		[HarmonyPrefix]
 		static void GetAllVentsAvailable()
@@ -130,8 +130,24 @@ namespace TweaksPlus.Comps
 			vents.Clear();
 			vents.AddRange(Object.FindObjectsOfType<VentController>());
 		}
+	}
 
-		[HarmonyPatch("FindPath")]
+	[HarmonyPatch(typeof(EnvironmentController))]
+	public static class ModifiedFindPath
+	{
+		[HarmonyTargetMethod]
+		static MethodInfo GetEnvironmentControllerFindPath() =>
+			AccessTools.Method(
+						typeof(EnvironmentController), "FindPath", 
+						[
+							typeof(Cell),
+							typeof(Cell),
+							typeof(PathType),
+							typeof(List<Cell>).MakeByRefType(),
+							typeof(bool).MakeByRefType()
+						]);
+
+		[HarmonyPatch]
 		[HarmonyReversePatch(HarmonyReversePatchType.Original)]
 		public static void FindPathWithExtraAttributes(this EnvironmentController instance, Cell startTile, Cell targetTile, PathType pathType, out List<Cell> path, out bool success)
 		{
@@ -176,17 +192,17 @@ namespace TweaksPlus.Comps
 
 		public static int GetDistance(EnvironmentController ec, Cell tileA, Cell tileB)
 		{
-			if (vents.Count != 0)
+			if (ModifiedFindPath_Data.vents.Count != 0)
 			{
 				int ventDistance = -1;
 				VentController closestVent = null;
 
-				for (int i = 0; i < vents.Count; i++)
+				for (int i = 0; i < ModifiedFindPath_Data.vents.Count; i++)
 				{
-					int foundDistance = ec.GetDistance(ec.CellFromPosition(vents[i].startPosition), tileA);
+					int foundDistance = ec.GetDistance(ec.CellFromPosition(ModifiedFindPath_Data.vents[i].startPosition), tileA);
 					if (ventDistance == -1 || foundDistance < ventDistance)
 					{
-						closestVent = vents[i];
+						closestVent = ModifiedFindPath_Data.vents[i];
 						ventDistance = foundDistance;
 					}
 				}

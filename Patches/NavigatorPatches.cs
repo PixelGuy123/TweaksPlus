@@ -100,9 +100,20 @@ namespace TweaksPlus.Patches
 		static IEnumerable<CodeInstruction> MakeSmartPaths(IEnumerable<CodeInstruction> i) =>
 			new CodeMatcher(i)
 			.MatchForward(false,
-				new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(EnvironmentController), "FindPath"))
+				new CodeMatch(
+					OpCodes.Callvirt, 
+					AccessTools.Method(
+						typeof(EnvironmentController), "FindPath", 
+						[
+							typeof(Cell),
+							typeof(Cell),
+							typeof(PathType),
+							typeof(List<Cell>).MakeByRefType(),
+							typeof(bool).MakeByRefType()
+						]))
 				) // this EnvironmentController instance, Cell startTile, Cell targetTile, PathType pathType, out List<Cell> path, out bool success
 			.Set(OpCodes.Call, AccessTools.Method(typeof(ModifiedFindPath), nameof(ModifiedFindPath.FindPathWithExtraAttributes)))
 			.InstructionEnumeration();
+		
 	}
 }

@@ -20,7 +20,7 @@ namespace TweaksPlus
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
 			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder,
-			enableGumVisualChange, enableMarkersWithPathfinding, enableMarkerAutoDisable;
+			enableGumVisualChange, enableMarkersWithPathfinding, enableMarkerAutoDisable, enableNonSquaryLayouts;
 
 		internal static ConfigEntry<bool> enableFieldTripCheatMode;
 
@@ -50,7 +50,6 @@ namespace TweaksPlus
 
 			enableNavigatorTargettingImprovement = Config.Bind(mainSec, "Enable Navigator improvement", true, "If True, the npc navigators will always avoid non-safe entity cells.");
 			enableHappyBaldiFix = Config.Bind(mainSec, "Enable Happy Baldi fix", true, "If True, Happy Baldi no longer crashes if Baldi is missing.");
-			enableNegativeUniqueness = Config.Bind(mainSec, "Enable different negative seeds", true, "If True, negative seeds will generate differently from positive, making a new whole set of possibilities.");
 			enablePlaytimeBullying = Config.Bind(mainSec, "Enable Playtime bullying", true, "If True, cutting Playtime\'s rope will count as bullying for five seconds.");
 			enablePrincipalNPCLecture = Config.Bind(mainSec, "Enable Principal lecture on NPCs", true, "If True, Principal will always give lecture to NPCs after giving them *actual* detention.");
 			enableBullyGettingDetention = Config.Bind(mainSec, "Enable Bully detention", true, "If True, Bully will have actual detention when caught.");
@@ -90,6 +89,9 @@ namespace TweaksPlus
 			enableMarkersWithPathfinding = Config.Bind(mainSec, "Enable marker pathfind", true, "If True, every time you place a marker, it\'ll generate a path to make it easier to find the marked spot.");
 			enableMarkerAutoDisable = Config.Bind(mainSec, "Enable marker auto-disable", true, "If True, every time you step on a marker, it\'ll be automatically removed.");
 
+			enableNegativeUniqueness = Config.Bind(genSec, "Enable different negative seeds", true, "If True, negative seeds will generate differently from positive, making a new whole set of possibilities.");
+			enableNonSquaryLayouts = Config.Bind(genSec, "Enable non-squary layouts", false, "If True, every room that has a square border by default won\'t have it anymore (includes modded rooms).");
+
 			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), true); // Post load because GeneratorManagement *might* be misused
 		}
 		public static void Log(string log)
@@ -105,7 +107,7 @@ namespace TweaksPlus
 
 		IEnumerator PostLoad()
 		{
-			yield return 2;
+			yield return 3;
 			yield return "Balancing weights...";
 
 
@@ -179,10 +181,85 @@ namespace TweaksPlus
 			yield return "Adding Renderer Container to everything...";
 			if (enableAdditionalCulling.Value)
 				Resources.FindObjectsOfTypeAll<Renderer>().Do(x => AdditionalCullingPatches.CreateRendererContainer(x.transform));
+
+			yield return "Modifying every room asset to include no squary layouts...";
+			if (enableNonSquaryLayouts.Value)
+			{
+
+				HashSet<IntVector2> touchedPositions = [];
+				Queue<IntVector2> positionsToGo = [];
+				foreach (var room in Resources.FindObjectsOfTypeAll<RoomAsset>())
+				{
+					if (room.secretCells.Count == 0) // Nothing to do here, move on
+						continue;
+
+					// Methods to be used in this system
+					void getNeighborCells(IntVector2 position)
+					{
+						for (int i = 0; i < Directions.Count; i++)
+						{
+							var nextPos = position + ((Direction)i).ToIntVector2();
+							if (!touchedPositions.Contains(nextPos) &&  // If it's not a cell that has been touched before
+								!positionsToGo.Contains(nextPos) &&  // If it hasn't been registered yet
+								!isPositionOutOfBounds(nextPos) &&  // Can't be out of bounds
+								room.secretCells.Contains(nextPos)) // Needs to be a secret cell to make sense
+								positionsToGo.Enqueue(nextPos);
+						}
+					}
+					bool isPositionOutOfBounds(IntVector2 position) => !room.cells.Exists(x => x.pos == position);
+					bool IsCellNextToOutOfBounds(IntVector2 position)
+					{
+						var cell = room.cells.Find(x => x.pos == position);
+
+						if (cell.type != 0 && cell.type < 15)
+							return false;
+
+						for (int i = 0; i < Directions.Count; i++)
+						{
+							if (isPositionOutOfBounds(position + ((Direction)i).ToIntVector2())) // If position is out of bounds
+								return true;
+						}
+						return false;
+					}
+					void removeCellFromRoom(IntVector2 position)
+					{
+						room.secretCells.Remove(position);
+						room.cells.RemoveAll(x => x.pos == position);
+						room.lockedCells.Remove(position);
+					}
+
+					void DFSForHiddenCellRemoval(IntVector2 pos)
+					{
+						positionsToGo.Clear();
+						positionsToGo.Enqueue(pos);
+
+						while (positionsToGo.Count != 0) // DFS
+						{
+							var position = positionsToGo.Dequeue();
+							removeCellFromRoom(position);
+							getNeighborCells(position);
+							touchedPositions.Add(position);
+						}
+					}
+
+					// Actual loop for getting the cells removed
+
+					for (int i = 0; i < room.secretCells.Count; i++)
+					{
+						if (!touchedPositions.Contains(room.secretCells[i]) && IsCellNextToOutOfBounds(room.secretCells[i]))
+						{
+							DFSForHiddenCellRemoval(room.secretCells[i]);
+							i = 0; // resets the loop basically to avoid missing out any cells
+						}
+					}
+
+					touchedPositions.Clear(); // Resets the hashset
+				}
+			}
 			
 
 
 		}
-		public const string mainSec = "Tweak Settings", balanceSec = "Balancing Settings", cheatSec = "Cheat Settings";
+		public const string mainSec = "Tweak Settings", balanceSec = "Balancing Settings", genSec = "Generator Settings", cheatSec = "Cheat Settings";
 	}
 }

@@ -15,7 +15,8 @@ namespace TweaksPlus.Patches
 		{
 			if (!Plugin.enableMarkersWithPathfinding.Value || 
 				map.Ec.CellFromPosition(___environmentMarker.transform.position).Null || 
-				!Singleton<CoreGameManager>.Instance.GetPlayer(0).plm.Entity.InBounds)
+				!Singleton<CoreGameManager>.Instance.GetPlayer(0).plm.Entity.InBounds ||
+				__instance.pin)
 				return;
 
 			var path = map.Ec.FindNavPath(
