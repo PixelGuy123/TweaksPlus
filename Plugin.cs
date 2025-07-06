@@ -1,12 +1,12 @@
-﻿using BepInEx;
+﻿using System.Collections;
+using System.Collections.Generic;
+using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using MTM101BaldAPI;
 using MTM101BaldAPI.Registers;
-using System.Collections;
-using System.Collections.Generic;
 using TweaksPlus.Patches;
 using UnityEngine;
-using MTM101BaldAPI;
 
 namespace TweaksPlus
 {
@@ -19,7 +19,7 @@ namespace TweaksPlus
 		internal static ConfigEntry<bool> enableAutoMapFillCheck, enableChalklesInstaDisable, enableChalklesProportionalSpawn,
 			enableItemUsageInPitstop, enableItemDescRevealInStorageLocker, enableMrsPompDynamicTimer, enableNavigatorTargettingImprovement,
 			enableHappyBaldiFix, enableNegativeUniqueness, enablePlaytimeBullying, enablePrincipalNPCLecture, enableBullyGettingDetention,
-			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder,
+			enableNPCActualDetention, enableRuleFreeZoneForNPCs, enableFacultyDoorDetectNPCStudents, enableNullMapTileFix, enableBeansBullying, enableAdditionalCulling, enableFreeWinMovement, enableProportionalYTPAdder,
 			enableGumVisualChange, enableMarkersWithPathfinding, enableMarkerAutoDisable, enableNonSquaryLayouts;
 
 		internal static ConfigEntry<bool> enableFieldTripCheatMode;
@@ -54,6 +54,7 @@ namespace TweaksPlus
 			enablePrincipalNPCLecture = Config.Bind(mainSec, "Enable Principal lecture on NPCs", true, "If True, Principal will always give lecture to NPCs after giving them *actual* detention.");
 			enableBullyGettingDetention = Config.Bind(mainSec, "Enable Bully detention", true, "If True, Bully will have actual detention when caught.");
 			enableNPCActualDetention = Config.Bind(mainSec, "Enable NPC actual detention", true, "If True, NPCs will always be stuck in the office when sent to detention.");
+			enableFacultyDoorDetectNPCStudents = Config.Bind(mainSec, "Enable NPC detection in Faculty Door", true, "If True, Faculty Only-Doors will also close on any NPC marked as a Student.");
 			enableRuleFreeZoneForNPCs = Config.Bind(mainSec, "Enable rule free zone for npcs", true, "If True, NPCs will have their guilt cleared in Rule Free zones (like Playground).");
 
 			enableNullMapTileFix = Config.Bind(mainSec, "Null map tile fix", true, "If True, Mrs Pomp\'s icon will no longer be invisible if the center of the room is an empty tile.");
@@ -92,7 +93,7 @@ namespace TweaksPlus
 			enableNegativeUniqueness = Config.Bind(genSec, "Enable different negative seeds", true, "If True, negative seeds will generate differently from positive, making a new whole set of possibilities.");
 			enableNonSquaryLayouts = Config.Bind(genSec, "Enable non-squary layouts", false, "If True, every room that has a square border by default won\'t have it anymore (includes modded rooms).");
 
-			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), true); // Post load because GeneratorManagement *might* be misused
+			LoadingEvents.RegisterOnAssetsLoaded(Info, PostLoad(), LoadingEventOrder.Post); // Post load because GeneratorManagement *might* be misused
 		}
 		public static void Log(string log)
 		{
@@ -256,7 +257,7 @@ namespace TweaksPlus
 					touchedPositions.Clear(); // Resets the hashset
 				}
 			}
-			
+
 
 
 		}
