@@ -5,8 +5,8 @@ using UnityEngine;
 namespace TweaksPlus.Patches
 {
 	[HarmonyPatch]
-    class ChalkFacePatch
-    {
+	class ChalkFacePatch
+	{
 		[HarmonyPatch(typeof(ChalkFace), "Initialize")]
 		[HarmonyPrefix]
 		static void AddComponent(ChalkFace __instance) =>
@@ -29,13 +29,13 @@ namespace TweaksPlus.Patches
 			if (Plugin.enableChalklesProportionalSpawn.Value)
 			{
 				float prevTimer = ___chalkles.setTime;
-				___chalkles.setTime = Mathf.Max(15f, Mathf.Sqrt((___chalkboard.Room.size.x ^ 2) + (___chalkboard.Room.size.z ^ 2)) * Plugin.chalklesSizeFactor.Value);
+				___chalkles.setTime = Mathf.Max(10f, Mathf.Sqrt((___chalkboard.Room.size.x ^ 2) + (___chalkboard.Room.size.z ^ 2)) * Plugin.chalklesSizeFactor.Value);
 				if (___chalkles.charge > 0f)
 					___chalkles.charge -= prevTimer - ___chalkles.setTime;
 
 				___chalkles.GetComponent<ChalkFaceTimerFix>().SetTimerFix(true);
 			}
-			
+
 		}
 
 		[HarmonyPatch(typeof(ChalkFace_Laughing), "Enter")]
